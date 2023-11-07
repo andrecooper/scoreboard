@@ -1,5 +1,7 @@
 package interview.scoreboard;
 
+import java.util.Optional;
+
 public interface MatchRepository {
 
     /**
@@ -9,4 +11,9 @@ public interface MatchRepository {
      **/
     MatchEntity save(MatchEntity matchEntity);
 
+
+    /**
+     * @return optional of the match by id.  and returns emtpy optional if match was not found
+     */
+    Optional<MatchEntity> get(Long id);
 }

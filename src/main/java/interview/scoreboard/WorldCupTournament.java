@@ -2,6 +2,7 @@ package interview.scoreboard;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public class WorldCupTournament extends AbstractTournament{
 
@@ -33,8 +34,19 @@ public class WorldCupTournament extends AbstractTournament{
     }
 
     @Override
-    protected Match completeMatch(long matchId) {
-        return null;
+    public Match completeMatch(long matchId) {
+        var matchEntityOpt = matchRepository.get(matchId);
+
+        return matchEntityOpt.map(match -> {
+                if (match.getMatchState() == MatchState.COMPLETED) {
+                    throw new IllegalStateException("Completing the match that's already completed is not allowed");
+                }
+                match.setEndTime(LocalDateTime.now());
+                match.setMatchState(MatchState.COMPLETED);
+                return matchRepository.save(match);
+            })
+            .map(WorldCupTournament::mapToModel)
+            .orElseThrow(NoSuchElementException::new);
     }
 
     @Override

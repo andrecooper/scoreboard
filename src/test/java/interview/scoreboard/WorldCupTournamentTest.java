@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,9 +67,36 @@ class WorldCupTournamentTest {
     }
 
     @Test
+    @DisplayName("When completing non existing match then throw an exception")
+    void completeNonExistingMatch() {
+        var nonExistingId = 45345L;
+
+        when(matchRepository.get(nonExistingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> worldCupTournament.completeMatch(nonExistingId)).isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    @DisplayName("When completing already completed match then throw an exception")
+    void completeAlreadyCompletedMatch() {
+        var matchId = 1L;
+        var liveMatch = new MatchEntity();
+        liveMatch.setMatchState(MatchState.COMPLETED);
+
+        when(matchRepository.get(matchId)).thenReturn(Optional.of(liveMatch));
+
+        assertThatThrownBy(() -> worldCupTournament.completeMatch(matchId)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     @DisplayName("When completing the match then update the state to COMPLETED and set endTime")
     void completeMatch() {
         var matchId = 1L;
+        var liveMatch = new MatchEntity();
+        liveMatch.setMatchState(MatchState.LIVE);
+
+        when(matchRepository.get(matchId)).thenReturn(Optional.of(liveMatch));
+        when(matchRepository.save(any(MatchEntity.class))).thenAnswer(answer -> answer.getArgument(0));
 
         var match = worldCupTournament.completeMatch(matchId);
 
