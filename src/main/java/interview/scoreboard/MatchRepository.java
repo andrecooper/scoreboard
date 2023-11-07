@@ -1,5 +1,6 @@
 package interview.scoreboard;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MatchRepository {
@@ -16,4 +17,9 @@ public interface MatchRepository {
      * @return optional of the match by id.  and returns emtpy optional if match was not found
      */
     Optional<MatchEntity> get(Long id);
+
+    /**
+     * @return either list of found matches or empty list if nothing was found
+     */
+    List<MatchEntity> findAll();
 }

@@ -6,6 +6,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -139,11 +141,62 @@ class WorldCupTournamentTest {
     }
 
     @Test
+    @DisplayName("When no matches then return empty list")
+    void testListNoMatches() {
+        when(matchRepository.findAll()).thenReturn(Collections.emptyList());
+
+        var matches = worldCupTournament.listLiveMatches();
+
+        assertThat(matches).isEmpty();
+    }
+
+    @Test
+    @DisplayName("When no LIVE matches then return empty list")
+    void testListNoLiveMatches() {
+        var m1 = new MatchEntity();
+        var m2 = new MatchEntity();
+
+        m1.setMatchState(MatchState.COMPLETED);
+        m2.setMatchState(MatchState.COMPLETED);
+
+        when(matchRepository.findAll()).thenReturn(List.of(m1, m2));
+
+        var matches = worldCupTournament.listLiveMatches();
+
+        assertThat(matches).isEmpty();
+    }
+
+    @Test
     @DisplayName("When listing matches then return LIVE matches ordered by number of goals and start date")
     void listLiveMatches() {
+        var allMatches = List.of(
+            stubMatch("Mexico", "Canada", 0, 5, MatchState.LIVE),
+            stubMatch("Greece", "Portugal", 10, 5, MatchState.COMPLETED),
+            stubMatch("Spain", "Brazil", 10, 2, MatchState.LIVE),
+            stubMatch("Germany", "France", 2, 2, MatchState.LIVE),
+            stubMatch("Nigeria", "Austria", 2, 12, MatchState.COMPLETED),
+            stubMatch("Uruguay", "Italy", 6, 6, MatchState.LIVE),
+            stubMatch("Argentina", "Australia", 3, 1, MatchState.LIVE));
+
+        when(matchRepository.findAll()).thenReturn(allMatches);
+
         var matches = worldCupTournament.listLiveMatches();
-        assertThat(matches).isNotEmpty()
+        assertThat(matches)
             .extracting(Match::getMatchState)
             .containsOnly(MatchState.LIVE);
+
+        assertThat(matches).extracting(Match::getTeamHome)
+            .containsExactly("Uruguay", "Spain", "Mexico", "Argentina", "Germany");
+    }
+
+    private static MatchEntity stubMatch(String mexico, String canada, int home, int away, MatchState matchState) {
+        var matchEntity = new MatchEntity();
+        matchEntity.setId(System.currentTimeMillis());
+        matchEntity.setTeamHome(mexico);
+        matchEntity.setTeamAway(canada);
+        matchEntity.setScore(new Score(home, away));
+        matchEntity.setStartTime(LocalDateTime.now());
+        matchEntity.setMatchState(matchState);
+        return matchEntity;
     }
 }

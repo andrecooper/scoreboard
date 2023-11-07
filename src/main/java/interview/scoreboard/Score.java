@@ -44,6 +44,10 @@ public class Score {
         this.away = newAwayScore;
     }
 
+    public int getNumberOfGoals() {
+        return this.home + this.away;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

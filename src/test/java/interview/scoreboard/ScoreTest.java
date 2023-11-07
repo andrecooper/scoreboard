@@ -1,11 +1,13 @@
 package interview.scoreboard;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class ScoreTest {
+
     @Test
     @DisplayName("When provided home score is less then current then throw an exception")
     void updateHomeScoreInvalid() {
@@ -32,5 +34,19 @@ class ScoreTest {
         assertThatThrownBy(() -> new Score(34, -1));
         assertThatThrownBy(() -> new Score(323, -23230));
         assertThatThrownBy(() -> new Score(323, Integer.MIN_VALUE));
+    }
+
+
+    @Test
+    @DisplayName("Has to return sum of home and away goals")
+    void testNumberOfScore() {
+        var score = new Score();
+        assertThat(score.getNumberOfGoals()).isEqualTo(0);
+
+        score.updateScore(3, 1);
+        assertThat(score.getNumberOfGoals()).isEqualTo(4);
+
+        score.updateScore(3, 3);
+        assertThat(score.getNumberOfGoals()).isEqualTo(6);
     }
 }

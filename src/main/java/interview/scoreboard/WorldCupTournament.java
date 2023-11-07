@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class WorldCupTournament extends AbstractTournament{
+public class WorldCupTournament extends AbstractTournament {
 
     private final MatchRepository matchRepository;
 
@@ -63,8 +63,16 @@ public class WorldCupTournament extends AbstractTournament{
     }
 
     @Override
-    protected List<Match> listLiveMatches() {
-        return null;
+    public List<Match> listLiveMatches() {
+        return matchRepository.findAll()
+            .stream()
+            .filter(match -> match.getMatchState() == MatchState.LIVE)
+            .sorted((m1, m2) -> {
+                var compareResByGoals = Integer.compare(m2.getScore().getNumberOfGoals(), m1.getScore().getNumberOfGoals());
+                return compareResByGoals == 0 ? m2.getStartTime().compareTo(m1.getStartTime()) : compareResByGoals;
+            })
+            .map(WorldCupTournament::mapToModel)
+            .toList();
     }
 
 
