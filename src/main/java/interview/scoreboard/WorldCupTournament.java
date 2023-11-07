@@ -6,12 +6,14 @@ import java.util.NoSuchElementException;
 
 public class WorldCupTournament extends AbstractTournament {
 
-    private final MatchRepository matchRepository;
-
-    protected WorldCupTournament(String name, MatchRepository matchRepository) {
+    public WorldCupTournament(String name, MatchRepository matchRepository) {
         super(name);
         this.matchRepository = matchRepository;
+        matchComparator = MatchComparator.defaultComparator();
     }
+
+    private final MatchRepository matchRepository;
+    private final MatchComparator matchComparator;
 
     @Override
     public Match startMatch(String teamHome, String teamAway) {
@@ -67,10 +69,7 @@ public class WorldCupTournament extends AbstractTournament {
         return matchRepository.findAll()
             .stream()
             .filter(match -> match.getMatchState() == MatchState.LIVE)
-            .sorted((m1, m2) -> {
-                var compareResByGoals = Integer.compare(m2.getScore().getNumberOfGoals(), m1.getScore().getNumberOfGoals());
-                return compareResByGoals == 0 ? m2.getStartTime().compareTo(m1.getStartTime()) : compareResByGoals;
-            })
+            .sorted(matchComparator)
             .map(WorldCupTournament::mapToModel)
             .toList();
     }

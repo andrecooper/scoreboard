@@ -9,7 +9,7 @@ class TournamentFunctionTest {
     @Test
     @DisplayName("Run world cup with matches from requirements")
     public void runWorldCup() {
-        var worldCupTournament = new WorldCupTournament("Fifa world cup", null);
+        var worldCupTournament = new WorldCupTournament("Fifa world cup", new MatchRepositoryInMemoryImpl());
 
         var m1 = worldCupTournament.startMatch("Mexico", "Canada");
         var m2 = worldCupTournament.startMatch("Spain", "Brasil");
