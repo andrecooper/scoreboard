@@ -50,8 +50,16 @@ public class WorldCupTournament extends AbstractTournament{
     }
 
     @Override
-    protected Match updateScore(long matchId, int homeScore, int awayScore) {
-        return null;
+    public Match updateScore(long matchId, int homeScore, int awayScore) {
+        var matchEntityOpt = matchRepository.get(matchId);
+
+        return matchEntityOpt.map(match -> {
+                var score = match.getScore();
+                score.updateScore(homeScore, awayScore);
+                return matchRepository.save(match);
+            })
+            .map(WorldCupTournament::mapToModel)
+            .orElseThrow(NoSuchElementException::new);
     }
 
     @Override

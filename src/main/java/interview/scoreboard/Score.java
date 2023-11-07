@@ -10,6 +10,13 @@ public class Score {
     public Score() {
     }
     public Score(int home, int away) {
+        if (home < 0) {
+            throw new IllegalStateException("Home score cannot be less than 0");
+        }
+
+        if (away < 0) {
+            throw new IllegalStateException("Away score cannot be less than 0");
+        }
         this.home = home;
         this.away = away;
     }
@@ -23,6 +30,18 @@ public class Score {
 
     public int getAway() {
         return away;
+    }
+
+    public void updateScore(int newHomeScore, int newAwayScore) {
+        if (newHomeScore < this.home) {
+            throw new IllegalStateException("New home score cannot be less than current");
+        }
+
+        if (newAwayScore < this.away) {
+            throw new IllegalStateException("New away score cannot be less than current");
+        }
+        this.home = newHomeScore;
+        this.away = newAwayScore;
     }
 
     @Override

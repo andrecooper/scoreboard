@@ -93,6 +93,7 @@ class WorldCupTournamentTest {
     void completeMatch() {
         var matchId = 1L;
         var liveMatch = new MatchEntity();
+        liveMatch.setId(matchId);
         liveMatch.setMatchState(MatchState.LIVE);
 
         when(matchRepository.get(matchId)).thenReturn(Optional.of(liveMatch));
@@ -105,17 +106,36 @@ class WorldCupTournamentTest {
     }
 
     @Test
+    @DisplayName("When updating score of non existing match then throw an exception")
+    void updateScoreOfNonExistingMatch() {
+        var nonExistingId = 45345L;
+
+        when(matchRepository.get(nonExistingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> worldCupTournament.updateScore(nonExistingId, 3, 2))
+            .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
     @DisplayName("When provided new score then update the entity")
     void updateScore() {
         var expectedHomeScore = 3;
         var expectedAwayScore = 1;
+
+        var matchId = 1L;
+        var liveMatch = new MatchEntity();
+        liveMatch.setId(matchId);
+        liveMatch.setScore(new Score(0, 0));
+        liveMatch.setMatchState(MatchState.LIVE);
+
+        when(matchRepository.get(matchId)).thenReturn(Optional.of(liveMatch));
+        when(matchRepository.save(any(MatchEntity.class))).thenAnswer(answer -> answer.getArgument(0));
 
         var match = worldCupTournament.updateScore(1L, expectedHomeScore, expectedAwayScore);
 
         assertThat(match.getScore())
             .returns(expectedHomeScore, Score::getHome)
             .returns(expectedAwayScore, Score::getAway);
-
     }
 
     @Test
