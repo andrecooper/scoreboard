@@ -1,15 +1,29 @@
 package interview.scoreboard;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.mockito.Mockito;
 
 class WorldCupTournamentTest {
 
     private final static String TOURNAMENT_NAME = "Fifa World Cup";
-    private AbstractTournament worldCupTournament = new WorldCupTournament(TOURNAMENT_NAME);
+    private WorldCupTournament worldCupTournament;
+    private final MatchRepository matchRepository = Mockito.mock(MatchRepository.class);
+
+    @BeforeEach
+    void setUp() {
+        worldCupTournament = new WorldCupTournament(TOURNAMENT_NAME, matchRepository);
+    }
+
 
     @Test
     @DisplayName("Tournament has to be named")
@@ -17,11 +31,26 @@ class WorldCupTournamentTest {
         assertThat(worldCupTournament.getName()).isEqualTo(TOURNAMENT_NAME);
     }
 
+    @NullAndEmptySource
+    @ParameterizedTest
+    @DisplayName("When team name is empty then throw an exception")
+    void testInvalidArgs(String teamName) {
+        assertThatThrownBy(() -> worldCupTournament.startMatch(teamName, "France")).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> worldCupTournament.startMatch("England", teamName)).isInstanceOf(IllegalArgumentException.class);
+    }
+
     @Test
     @DisplayName("When starting the match then init it with default values: startTime, state and score")
     void startMatch() {
         var homeTeam = "Canada";
         var awayTeam = "France";
+
+        when(matchRepository.save(any(MatchEntity.class)))
+            .thenAnswer(answer -> {
+                var argument = (MatchEntity) answer.getArgument(0);
+                argument.setId(System.currentTimeMillis());
+                return argument;
+            });
 
         var match = worldCupTournament.startMatch(homeTeam, awayTeam);
 

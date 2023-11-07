@@ -7,6 +7,13 @@ package interview.scoreboard;
  */
 public class Score {
 
+    public Score() {
+    }
+    public Score(int home, int away) {
+        this.home = home;
+        this.away = away;
+    }
+
     private int home = 0;
     private int away = 0;
 
@@ -18,8 +25,27 @@ public class Score {
         return away;
     }
 
-    public Score(int home, int away) {
-        this.home = home;
-        this.away = away;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Score score = (Score) o;
+
+        if (home != score.home) {
+            return false;
+        }
+        return away == score.away;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = home;
+        result = 31 * result + away;
+        return result;
     }
 }
